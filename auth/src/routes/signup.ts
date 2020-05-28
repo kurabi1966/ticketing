@@ -21,8 +21,6 @@ router.post(
   ],
   validateRequest,
   async (req: Request, res: Response) => {
-    // console.log(`auth: ${req.url}`);
-
     const email = req.body.email.toLocaleLowerCase();
     const password = req.body.password;
     // Find a user that has the same email

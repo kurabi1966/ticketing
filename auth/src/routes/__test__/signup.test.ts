@@ -43,10 +43,7 @@ it('return a 400 when missing email and/or password while signup', async () => {
 });
 
 it('disallows duplicate emails', async () => {
-  await request(app)
-    .post('/api/users/signup')
-    .send({ email: 'test@test.com', password: '12345' })
-    .expect(201);
+  await global.signup(); // user email is test@test.com
 
   return request(app)
     .post('/api/users/signup')
@@ -60,4 +57,17 @@ it('sets a cokkie after successful signup', async () => {
     .send({ email: 'test@test.com', password: 'password' })
     .expect(201);
   expect(response.get('Set-Cookie')).toBeDefined();
+});
+
+it('stores the email of the user in lowecase charachters', async () => {
+  const signupResponse = await request(app)
+    .post('/api/users/signup')
+    .send({ email: 'Test@tEst.com', password: 'password' })
+    .expect(201);
+  const cookie = signupResponse.get('Set-Cookie');
+
+  const response = await request(app)
+    .get('/api/users/currentuser')
+    .set('Cookie', cookie);
+  expect(response.body.currentUser.email).toEqual('test@test.com');
 });

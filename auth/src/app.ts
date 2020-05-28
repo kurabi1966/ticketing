@@ -10,9 +10,11 @@ import { signoutRouter } from './routes/signout';
 import { signupRouter } from './routes/signup';
 import { errorHandler } from './middlewares/error-handler';
 import { NotFoundError } from './errors/not-found-error';
+import { logReqUrl } from './middlewares/log-req-url';
 
 const app = experss();
 app.set('trust proxy', true);
+app.use(logReqUrl);
 app.use(json());
 app.use(
   cookieSession({
