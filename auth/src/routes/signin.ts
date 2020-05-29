@@ -5,8 +5,7 @@ import jwt from 'jsonwebtoken';
 
 import { User } from '../models/user';
 import { PasswordManager } from '../services/password-manager';
-import { validateRequest } from '../middlewares/validate-request';
-import { BadRequestError } from '../errors/bad-request-error';
+import { validateRequest, BadRequestError } from '@zidny.net/common';
 
 const router = express.Router();
 router.post(
@@ -20,7 +19,7 @@ router.post(
   ],
   validateRequest,
   async (req: Request, res: Response) => {
-    console.log(`auth: ${req.url}`);
+    // console.log(`auth: ${req.url}`);
 
     const email = req.body.email.toLocaleLowerCase();
     const password = req.body.password;
