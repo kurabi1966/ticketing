@@ -1,6 +1,5 @@
 import express, { Request, Response } from 'express';
-import { requireAuth } from '@zidny.net/common';
-import { validateRequest } from '@zidny.net/common';
+import { requireAuth, validateRequest } from '@zidny.net/common';
 import { body } from 'express-validator';
 
 import { Ticket } from '../models/ticket';
