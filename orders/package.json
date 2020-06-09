@@ -1,11 +1,11 @@
 {
-  "name": "tickets",
+  "name": "orders",
   "version": "1.0.0",
   "description": "Ticketting Micro Service",
   "main": "index.js",
   "scripts": {
     "start": "ts-node-dev src/index.ts --poll",
-    "test": "jest --watchAll --no-cache --coverage --verbose"
+    "test": "jest --watchAll --no-cache --verbose"
   },
   "jest": {
     "preset": "ts-jest",
@@ -15,7 +15,7 @@
     ]
   },
   "keywords": [
-    "Tickets",
+    "Orders",
     "Microservice"
   ],
   "author": "Mohammed Ammar Kurabi",

@@ -1,7 +1,7 @@
 import request from 'supertest';
 
 import { app } from '../../app';
-import { response } from 'express';
+import { natsWrapper } from '../../nats-wrapper';
 
 it('return a 404 if the provided id does not exist', async () => {
   const id = global.generateId();
@@ -138,4 +138,55 @@ it('update a ticket title only', async () => {
 
   expect(updatedTicket.body.title).toEqual('Updated title');
   expect(updatedTicket.body.price).toEqual(123.4);
+});
+
+it('increment version of the ticket after updating it', async () => {
+  const cookie = global.getAuthSession();
+  const { body: ticket } = await request(app)
+    .post('/api/tickets')
+    .set('Cookie', cookie)
+    .send({ title: 'ticket title', price: 123.5 })
+    .expect(201);
+  expect(ticket.version).toEqual(0);
+
+  const { body: first_updated_ticket } = await request(app)
+    .put(`/api/tickets/${ticket.id}`)
+    .set('Cookie', cookie)
+    .send({ title: 'updated ticket title', price: 321.5 })
+    .expect(200);
+  expect(first_updated_ticket.version).toEqual(1);
+
+  const { body: second_updated_ticket } = await request(app)
+    .put(`/api/tickets/${ticket.id}`)
+    .set('Cookie', cookie)
+    .send({ title: 'new updated ticket title', price: 110.5 })
+    .expect(200);
+  expect(second_updated_ticket.version).toEqual(2);
+});
+
+it('publishes an event', async () => {
+  // Create a ticket
+  const ticket = {
+    title: 'ticket one',
+    price: 123.4,
+    userId: global.generateId(),
+  };
+
+  const cookie = global.getAuthSession();
+  const reposnse = await request(app)
+    .post('/api/tickets')
+    .set('Cookie', cookie)
+    .send(ticket)
+    .expect(201);
+
+  // Get the id of the ticket
+  const ticketId = reposnse.body.id;
+
+  await request(app)
+    .put(`/api/tickets/${ticketId}`)
+    .set('Cookie', cookie)
+    .send({ title: 'Updated title', price: 432.1 })
+    .expect(200);
+
+  expect(natsWrapper.client.publish).toHaveBeenCalled();
 });

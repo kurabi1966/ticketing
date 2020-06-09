@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { app } from './app';
+import { natsWrapper } from '../src/nats-wrapper';
 
 const start = async () => {
   if (!process.env.JWT_KEY) {
@@ -19,6 +20,31 @@ const start = async () => {
   } catch (error) {
     console.error('Could not connect to tickets-mongo database.');
   }
+
+  if (
+    process.env.NATS_CLUSTER_ID &&
+    process.env.NATS_CLIENT_ID &&
+    process.env.NATS_URL
+  ) {
+    natsWrapper.connect(
+      process.env.NATS_CLUSTER_ID,
+      process.env.NATS_CLIENT_ID,
+      process.env.NATS_URL
+    );
+  } else {
+    throw new Error(
+      'Environment Variables of the NATS cluster should be defined'
+    );
+  }
+
+  natsWrapper.client.on('close', () => {
+    console.log('NATS connection closed!');
+    process.exit();
+  });
+
+  process.on('SIGINT', () => natsWrapper.client.close());
+  process.on('SIGTERM', () => natsWrapper.client.close());
+
   app.listen(3000, () => {
     console.log('tickets Micro Service started on port 3000.');
   });

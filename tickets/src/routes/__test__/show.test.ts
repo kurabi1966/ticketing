@@ -14,8 +14,8 @@ it('returns 404 if the ticket is not found', async () => {
   await request(app).get(`/api/tickets/${id}`).send().expect(404);
 });
 
-it('returns 500 if try to a ticket with an invalied id', async () => {
-  await request(app).get('/api/tickets/123').send().expect(500);
+it('returns 400 if try to a ticket with an invalied id', async () => {
+  await request(app).get('/api/tickets/123').send().expect(400);
 });
 
 it('returns 200 if the ticket founded', async () => {

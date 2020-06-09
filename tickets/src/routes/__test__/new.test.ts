@@ -2,6 +2,7 @@ import request from 'supertest';
 
 import { app } from '../../app';
 import { Ticket } from '../../models/ticket';
+import { natsWrapper } from '../../nats-wrapper';
 
 it('has a route handler listening to /api/tickets for post requests', async () => {
   const response = await request(app).post('/api/tickets').send({});
@@ -60,7 +61,7 @@ it('returns an error if an empty price is provided', async () => {
     .expect(400);
 });
 
-it('creates a ticket with valied inputs', async () => {
+it('creates a ticket if it provided with valied inputs', async () => {
   let tickets = await Ticket.find({});
   expect(tickets.length).toEqual(0);
 
@@ -76,6 +77,25 @@ it('creates a ticket with valied inputs', async () => {
   expect(tickets[0].price).toEqual(123.5);
 });
 
+it('has version 0 for the newelly created ticket', async () => {
+  const { body: ticket } = await request(app)
+    .post('/api/tickets')
+    .set('Cookie', global.getAuthSession())
+    .send({ title: 'ticket title', price: 123.5 })
+    .expect(201);
+  expect(ticket.version).toEqual(0);
+});
+
+it('publish an event', async () => {
+  const ticketTitle = 'ticket title';
+  await request(app)
+    .post('/api/tickets')
+    .set('Cookie', global.getAuthSession())
+    .send({ title: ticketTitle, price: 100 })
+    .expect(201);
+
+  expect(natsWrapper.client.publish).toHaveBeenCalled();
+});
 // Template:
 // it('', async() =>{
 
