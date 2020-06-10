@@ -4,11 +4,12 @@ import {
   NotFoundError,
   NotAuthorizedError,
   validateRequest,
+  BadRequestError,
 } from '@zidny.net/common';
 
 import { body } from 'express-validator';
 import { Ticket } from '../models/ticket';
-import { TicketUpdatedPublisher } from '../events/publisher/ticket-updated-publisher';
+import { TicketUpdatedPublisher } from '../events/publishers/ticket-updated-publisher';
 import { natsWrapper } from '../nats-wrapper';
 
 const router = express.Router();
@@ -37,6 +38,12 @@ router.put(
     // ticket exist but the updater is not the owner
     if (ticket.userId !== req.currentUser!.id) {
       throw new NotAuthorizedError();
+    }
+
+    // if the owner of the ticket is trying to edit the ticket, but the ticket is locked, then we have to throw an error
+
+    if (ticket.orderId) {
+      throw new BadRequestError('Ticket you are trying to edit is locked');
     }
 
     // [1] user authenticated, [2] user is the owner, [3] fields are valied

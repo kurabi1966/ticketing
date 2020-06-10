@@ -1,5 +1,5 @@
 import request from 'supertest';
-
+import { Ticket } from '../../models/ticket';
 import { app } from '../../app';
 import { natsWrapper } from '../../nats-wrapper';
 
@@ -110,6 +110,35 @@ it('update a ticket if the the user is the owner and the provided fields are cor
 
   expect(updatedTicket.body.title).toEqual('Updated title');
   expect(updatedTicket.body.price).toEqual(432.1);
+});
+
+it('rejects updateing the ticket if it is locked', async () => {
+  // Create a ticket
+  const ticket_data = {
+    title: 'ticket one',
+    price: 123.4,
+    userId: global.generateId(),
+  };
+
+  const cookie = global.getAuthSession();
+  const reposnse = await request(app)
+    .post('/api/tickets')
+    .set('Cookie', cookie)
+    .send(ticket_data)
+    .expect(201);
+
+  // Get the id of the ticket
+  const ticketId = reposnse.body.id;
+
+  const ticket = await Ticket.findById(ticketId);
+  ticket!.set({ orderId: global.generateId() });
+  await ticket!.save();
+
+  await request(app)
+    .put(`/api/tickets/${ticketId}`)
+    .set('Cookie', cookie)
+    .send({ title: 'Updated title', price: 432.1 })
+    .expect(400); // bad request
 });
 
 it('update a ticket title only', async () => {
