@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 import {
   requireAuth,
   NotFoundError,
-  NotAutorizedError,
+  NotAuthorizedError,
   validateRequest,
 } from '@zidny.net/common';
 
@@ -36,7 +36,7 @@ router.put(
 
     // ticket exist but the updater is not the owner
     if (ticket.userId !== req.currentUser!.id) {
-      throw new NotAutorizedError();
+      throw new NotAuthorizedError();
     }
 
     // [1] user authenticated, [2] user is the owner, [3] fields are valied
