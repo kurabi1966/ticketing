@@ -13,4 +13,12 @@ cd .. && cd auth
 npm uninstall @zidny.net/common
 npm install @zidny.net/common
 
+cd .. && cd expiration
+npm uninstall @zidny.net/common
+npm install @zidny.net/common
+
+cd .. && cd payments
+npm uninstall @zidny.net/common
+npm install @zidny.net/common
+
 cd ..
